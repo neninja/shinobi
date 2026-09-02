@@ -1,18 +1,32 @@
 # Shinobi
 
-To start your Phoenix server:
+## Configuração
 
-* Run `mix setup` to install and setup dependencies
-* Start Phoenix endpoint with `mix phx.server` or inside IEx with `iex -S mix phx.server`
+- Inicie o PostgreSQL local
 
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
+```sh
+docker run -d \
+    --name postgres \
+    -e POSTGRES_USER=postgres \
+    -e POSTGRES_PASSWORD=postgres \
+    -e POSTGRES_DB=shinobi_dev \
+    -p 5432:5432 \
+    -v shinobi_postgres_data:/var/lib/postgresql/data \
+    postgres:16-alpine
+```
 
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
+- Baixe as dependências, build, migrations e seed
 
-## Learn more
+```shell
+mix setup
+```
 
-* Official website: https://www.phoenixframework.org/
-* Guides: https://hexdocs.pm/phoenix/overview.html
-* Docs: https://hexdocs.pm/phoenix
-* Forum: https://elixirforum.com/c/phoenix-forum
-* Source: https://github.com/phoenixframework/phoenix
+> Sugestão de dados iniciais com `mix example.setup` e resetar com `mix fresh`
+
+## Execução
+
+- Inicie o servidor
+
+```shell
+mix server
+```

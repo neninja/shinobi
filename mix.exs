@@ -88,7 +88,8 @@ defmodule Shinobi.MixProject do
         "esbuild shinobi --minify",
         "phx.digest"
       ],
-      precommit: ["compile --warning-as-errors", "deps.unlock --unused", "format", "test"]
+      precommit: ["compile --warning-as-errors", "deps.unlock --unused", "format", "test"],
+      server: ["phx.server"]
     ]
   end
 end
