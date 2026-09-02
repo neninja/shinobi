@@ -52,6 +52,14 @@ defmodule ShinobiWeb.Router do
 
     live_session :require_authenticated_user,
       on_mount: [{ShinobiWeb.UserAuth, :require_authenticated}] do
+      live "/atividades", ActivityLive.Index, :index
+      live "/atividades/new", ActivityLive.Form, :new
+      live "/atividades/:id", ActivityLive.Show, :show
+      live "/atividades/:id/edit", ActivityLive.Form, :edit
+      live "/registros", RecordLive.Index, :index
+      live "/registros/new", RecordLive.Form, :new
+      live "/registros/:id", RecordLive.Show, :show
+      live "/registros/:id/edit", RecordLive.Form, :edit
       live "/users/settings", UserLive.Settings, :edit
       live "/users/settings/confirm-email/:token", UserLive.Settings, :confirm_email
     end

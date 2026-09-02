@@ -35,38 +35,123 @@ defmodule ShinobiWeb.Layouts do
 
   def app(assigns) do
     ~H"""
-    <header class="navbar px-4 sm:px-6 lg:px-8">
-      <div class="flex-1">
-        <a href="/" class="flex-1 flex w-fit items-center gap-2">
-          <img src={~p"/images/logo.svg"} width="36" />
-          <span class="text-sm font-semibold">v{Application.spec(:phoenix, :vsn)}</span>
-        </a>
-      </div>
-      <div class="flex-none">
-        <ul class="flex flex-column px-1 space-x-4 items-center">
-          <li>
-            <a href="https://phoenixframework.org/" class="btn btn-ghost">Website</a>
-          </li>
-          <li>
-            <a href="https://github.com/phoenixframework/phoenix" class="btn btn-ghost">GitHub</a>
-          </li>
-          <li>
-            <.theme_toggle />
-          </li>
-          <li>
-            <a href="https://hexdocs.pm/phoenix/overview.html" class="btn btn-primary">
-              Get Started <span aria-hidden="true">&rarr;</span>
-            </a>
-          </li>
-        </ul>
+    <header class="sticky top-0 z-40 border-b border-zinc-200 bg-white/90 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/90">
+      <div class="mx-auto flex h-16 max-w-5xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
+        <.link
+          id="app-home-link"
+          navigate={if @current_scope && @current_scope.user, do: ~p"/registros", else: ~p"/"}
+          class="flex items-center gap-3"
+        >
+          <span class="inline-flex size-10 items-center justify-center rounded-lg bg-zinc-950 text-sm font-semibold text-white dark:bg-emerald-400 dark:text-zinc-950">
+            S
+          </span>
+          <span class="min-w-0">
+            <span class="block text-sm font-semibold leading-5 text-zinc-950 dark:text-zinc-50">
+              Shinobi
+            </span>
+            <span class="block text-xs leading-4 text-zinc-500 dark:text-zinc-400">
+              Training log
+            </span>
+          </span>
+        </.link>
+
+        <nav
+          :if={@current_scope && @current_scope.user}
+          class="hidden items-center gap-1 sm:flex"
+          aria-label="Principal"
+        >
+          <.link
+            id="nav-records"
+            navigate={~p"/registros"}
+            class="rounded-md px-3 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white"
+          >
+            Historico
+          </.link>
+          <.link
+            id="nav-activities"
+            navigate={~p"/atividades"}
+            class="rounded-md px-3 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white"
+          >
+            Atividades
+          </.link>
+          <.link
+            id="nav-settings"
+            navigate={~p"/users/settings"}
+            class="rounded-md px-3 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white"
+          >
+            Conta
+          </.link>
+          <span class="max-w-44 truncate px-2 text-xs font-medium text-zinc-500 dark:text-zinc-400">
+            {@current_scope.user.email}
+          </span>
+          <.link
+            id="nav-logout"
+            href={~p"/users/log-out"}
+            method="delete"
+            class="rounded-md px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-950/40"
+          >
+            Sair
+          </.link>
+        </nav>
+
+        <nav
+          :if={!(@current_scope && @current_scope.user)}
+          class="flex items-center gap-2"
+          aria-label="Autenticacao"
+        >
+          <.link
+            id="nav-login"
+            navigate={~p"/users/log-in"}
+            class="rounded-md px-3 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white"
+          >
+            Entrar
+          </.link>
+          <.link
+            id="nav-register"
+            navigate={~p"/users/register"}
+            class="rounded-lg bg-zinc-950 px-3 py-2 text-sm font-semibold text-white transition hover:bg-zinc-800 dark:bg-emerald-400 dark:text-zinc-950 dark:hover:bg-emerald-300"
+          >
+            Criar conta
+          </.link>
+        </nav>
       </div>
     </header>
 
-    <main class="px-4 py-20 sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-2xl space-y-4">
+    <main class="min-h-[calc(100vh-4rem)] bg-zinc-50 px-4 py-5 pb-24 text-zinc-950 dark:bg-zinc-950 dark:text-zinc-50 sm:px-6 sm:py-8 lg:px-8">
+      <div class="mx-auto max-w-5xl">
         {render_slot(@inner_block)}
       </div>
     </main>
+
+    <nav
+      :if={@current_scope && @current_scope.user}
+      class="fixed inset-x-0 bottom-0 z-40 border-t border-zinc-200 bg-white/95 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/95 sm:hidden"
+      aria-label="Principal mobile"
+    >
+      <div class="mx-auto grid max-w-md grid-cols-3 gap-2">
+        <.link
+          id="mobile-nav-records"
+          navigate={~p"/registros"}
+          class="flex h-12 flex-col items-center justify-center gap-1 rounded-lg text-xs font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white"
+        >
+          <.icon name="hero-trophy" class="size-5" /> PRs
+        </.link>
+        <.link
+          id="mobile-nav-new-record"
+          navigate={~p"/registros/new"}
+          class="flex h-12 flex-col items-center justify-center gap-1 rounded-lg bg-zinc-950 text-xs font-semibold text-white shadow-sm transition hover:bg-zinc-800 dark:bg-emerald-400 dark:text-zinc-950 dark:hover:bg-emerald-300"
+        >
+          <.icon name="hero-plus" class="size-5" /> Novo
+        </.link>
+        <.link
+          id="mobile-nav-activities"
+          navigate={~p"/atividades"}
+          class="flex h-12 flex-col items-center justify-center gap-1 rounded-lg text-xs font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white"
+        >
+          <.icon name="hero-list-bullet" class="size-5" /> Atividades
+        </.link>
+      </div>
+    </nav>
 
     <.flash_group flash={@flash} />
     """
