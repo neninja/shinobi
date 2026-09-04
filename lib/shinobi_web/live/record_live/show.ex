@@ -11,11 +11,11 @@ defmodule ShinobiWeb.RecordLive.Show do
     <Layouts.app flash={@flash} current_scope={@current_scope}>
       <section id="record-show-page" class="mx-auto max-w-2xl space-y-5">
         <.link
-          id="back-to-records"
-          navigate={~p"/registros"}
+          id="back-to-activity"
+          navigate={~p"/atividades/#{@record.activity}"}
           class="inline-flex items-center gap-2 text-sm font-medium text-zinc-600 transition hover:text-zinc-950 dark:text-zinc-300 dark:hover:text-white"
         >
-          <.icon name="hero-arrow-left" class="size-4" /> Historico
+          <.icon name="hero-arrow-left" class="size-4" /> Atividade
         </.link>
 
         <article class="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
@@ -133,13 +133,15 @@ defmodule ShinobiWeb.RecordLive.Show do
 
   @impl true
   def handle_event("delete", _params, socket) do
+    activity = socket.assigns.record.activity
+
     {:ok, _record} =
       Training.delete_personal_record(socket.assigns.current_scope, socket.assigns.record)
 
     {:noreply,
      socket
      |> put_flash(:info, "PR removido.")
-     |> push_navigate(to: ~p"/registros")}
+     |> push_navigate(to: ~p"/atividades/#{activity}")}
   end
 
   defp format_date(date), do: Calendar.strftime(date, "%d/%m/%Y")

@@ -11,24 +11,24 @@
         Registre PRs sem brigar com a tela durante o treino.
       </h1>
       <p class="mt-4 text-base leading-7 text-zinc-600 dark:text-zinc-300">
-        Atividades globais, atividades proprias e historico privado em um fluxo rapido para celular.
+        Atividades globais, atividades proprias e PRs privados em um fluxo rapido para celular.
       </p>
 
       <div class="mt-6 flex flex-col gap-3 sm:flex-row">
         <%= if @current_scope && @current_scope.user do %>
           <.link
-            id="home-records-link"
-            navigate={~p"/registros"}
-            class="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-zinc-950 px-4 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-zinc-800 active:translate-y-0 dark:bg-emerald-400 dark:text-zinc-950 dark:hover:bg-emerald-300"
-          >
-            <.icon name="hero-trophy" class="size-5" /> Abrir historico
-          </.link>
-          <.link
             id="home-activities-link"
             navigate={~p"/atividades"}
-            class="inline-flex h-12 items-center justify-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 text-sm font-semibold text-zinc-800 transition hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+            class="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-zinc-950 px-4 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-zinc-800 active:translate-y-0 dark:bg-emerald-400 dark:text-zinc-950 dark:hover:bg-emerald-300"
           >
             <.icon name="hero-list-bullet" class="size-5" /> Ver atividades
+          </.link>
+          <.link
+            id="home-new-record-link"
+            navigate={~p"/registros/new"}
+            class="inline-flex h-12 items-center justify-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 text-sm font-semibold text-zinc-800 transition hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+          >
+            <.icon name="hero-plus" class="size-5" /> Novo PR
           </.link>
         <% else %>
           <.link

@@ -14,11 +14,11 @@ defmodule ShinobiWeb.RecordLive.Form do
     <Layouts.app flash={@flash} current_scope={@current_scope}>
       <section id="record-form-page" class="mx-auto max-w-2xl space-y-5">
         <.link
-          id="back-to-records"
-          navigate={~p"/registros"}
+          id="back-to-activity"
+          navigate={~p"/atividades/#{@selected_activity}"}
           class="inline-flex items-center gap-2 text-sm font-medium text-zinc-600 transition hover:text-zinc-950 dark:text-zinc-300 dark:hover:text-white"
         >
-          <.icon name="hero-arrow-left" class="size-4" /> Historico
+          <.icon name="hero-arrow-left" class="size-4" /> Atividade
         </.link>
 
         <div>
@@ -219,7 +219,7 @@ defmodule ShinobiWeb.RecordLive.Form do
         {:noreply,
          socket
          |> put_flash(:info, "PR registrado.")
-         |> push_navigate(to: ~p"/registros/#{record}")}
+         |> push_navigate(to: ~p"/atividades/#{record.activity}")}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         selected_activity =
@@ -245,7 +245,7 @@ defmodule ShinobiWeb.RecordLive.Form do
         {:noreply,
          socket
          |> put_flash(:info, "PR atualizado.")
-         |> push_navigate(to: ~p"/registros/#{record}")}
+         |> push_navigate(to: ~p"/atividades/#{record.activity}")}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         selected_activity =

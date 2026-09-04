@@ -16,7 +16,7 @@ O Shinobi Training Log permite que usuarios cadastrem atividades de treino e reg
 - Criar, editar e remover atividades proprias.
 - Visualizar atividades globais sem permitir edicao por usuarios comuns.
 - Registrar PRs vinculados a uma atividade disponivel para o usuario.
-- Listar, visualizar, editar e remover apenas os PRs do usuario autenticado.
+- Listar PRs dentro da atividade correspondente, visualizar, editar e remover apenas os PRs do usuario autenticado.
 - Adaptar o formulario de PR ao tipo de medida da atividade.
 
 ## Tipos de medida
@@ -41,7 +41,7 @@ O seed cria atividades globais sem usuario definido, como Cindy, Karen, Bar Musc
 
 ## Experiencia mobile
 
-- Navegacao simples entre Historico e Atividades.
+- Navegacao centrada em Atividades, com os registros de cada atividade no detalhe dela.
 - Cards grandes para leitura rapida no celular.
 - Acoes principais com botoes destacados.
 - Formularios curtos, com campos exibidos somente quando fazem sentido para a medida escolhida.

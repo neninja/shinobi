@@ -25,6 +25,30 @@ defmodule Shinobi.TrainingTest do
       refute Enum.any?(Training.list_activities(scope), &(&1.name == "Other Bench"))
     end
 
+    test "lists activity summaries ordered by best primary record" do
+      scope = user_scope_fixture()
+      other_scope = user_scope_fixture()
+
+      bench = global_activity_fixture(name: "Bench Press", measurement_type: "reps_weight")
+      pull_up = activity_fixture(scope, name: "Pull Up", measurement_type: "reps")
+      empty = activity_fixture(scope, name: "No PR Yet", measurement_type: "time")
+
+      personal_record_fixture(scope, bench, repetitions: "8", weight_kg: "70")
+      best_bench = personal_record_fixture(scope, bench, repetitions: "3", weight_kg: "100")
+      personal_record_fixture(scope, pull_up, repetitions: "12")
+      personal_record_fixture(other_scope, bench, repetitions: "1", weight_kg: "140")
+
+      summaries = Training.list_activity_summaries(scope)
+
+      assert Enum.map(summaries, & &1.activity.id) == [bench.id, pull_up.id, empty.id]
+
+      bench_summary = List.first(summaries)
+      assert bench_summary.best_record.id == best_bench.id
+      assert bench_summary.record_label == "Recorde de peso"
+      assert bench_summary.record_value == "100 kg"
+      assert bench_summary.records_count == 2
+    end
+
     test "does not allow users to update global activities" do
       scope = user_scope_fixture()
       global_activity = global_activity_fixture()
@@ -96,6 +120,21 @@ defmodule Shinobi.TrainingTest do
       records = Training.list_personal_records(scope)
 
       assert Enum.map(records, & &1.id) == [own_record.id]
+    end
+
+    test "lists an activity history with the largest primary record first" do
+      scope = user_scope_fixture()
+      other_scope = user_scope_fixture()
+      activity = global_activity_fixture(name: "Deadlift", measurement_type: "reps_weight")
+
+      light = personal_record_fixture(scope, activity, repetitions: "8", weight_kg: "90")
+      heavy = personal_record_fixture(scope, activity, repetitions: "2", weight_kg: "130")
+      middle = personal_record_fixture(scope, activity, repetitions: "5", weight_kg: "110")
+      personal_record_fixture(other_scope, activity, repetitions: "1", weight_kg: "180")
+
+      records = Training.list_personal_records_for_activity(scope, activity)
+
+      assert Enum.map(records, & &1.id) == [heavy.id, middle.id, light.id]
     end
 
     test "updates a PR activity and clears fields that no longer apply" do

@@ -56,7 +56,6 @@ defmodule ShinobiWeb.Router do
       live "/atividades/new", ActivityLive.Form, :new
       live "/atividades/:id", ActivityLive.Show, :show
       live "/atividades/:id/edit", ActivityLive.Form, :edit
-      live "/registros", RecordLive.Index, :index
       live "/registros/new", RecordLive.Form, :new
       live "/registros/:id", RecordLive.Show, :show
       live "/registros/:id/edit", RecordLive.Form, :edit

@@ -39,7 +39,7 @@ defmodule ShinobiWeb.Layouts do
       <div class="mx-auto flex h-16 max-w-5xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
         <.link
           id="app-home-link"
-          navigate={if @current_scope && @current_scope.user, do: ~p"/registros", else: ~p"/"}
+          navigate={if @current_scope && @current_scope.user, do: ~p"/atividades", else: ~p"/"}
           class="flex items-center gap-3"
         >
           <span class="inline-flex size-10 items-center justify-center rounded-lg bg-zinc-950 text-sm font-semibold text-white dark:bg-emerald-400 dark:text-zinc-950">
@@ -61,18 +61,18 @@ defmodule ShinobiWeb.Layouts do
           aria-label="Principal"
         >
           <.link
-            id="nav-records"
-            navigate={~p"/registros"}
-            class="rounded-md px-3 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white"
-          >
-            Historico
-          </.link>
-          <.link
             id="nav-activities"
             navigate={~p"/atividades"}
             class="rounded-md px-3 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white"
           >
             Atividades
+          </.link>
+          <.link
+            id="nav-new-record"
+            navigate={~p"/registros/new"}
+            class="rounded-md px-3 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white"
+          >
+            Novo PR
           </.link>
           <.link
             id="nav-settings"
@@ -128,13 +128,13 @@ defmodule ShinobiWeb.Layouts do
       class="fixed inset-x-0 bottom-0 z-40 border-t border-zinc-200 bg-white/95 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/95 sm:hidden"
       aria-label="Principal mobile"
     >
-      <div class="mx-auto grid max-w-md grid-cols-3 gap-2">
+      <div class="mx-auto grid max-w-md grid-cols-2 gap-2">
         <.link
-          id="mobile-nav-records"
-          navigate={~p"/registros"}
+          id="mobile-nav-activities"
+          navigate={~p"/atividades"}
           class="flex h-12 flex-col items-center justify-center gap-1 rounded-lg text-xs font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white"
         >
-          <.icon name="hero-trophy" class="size-5" /> PRs
+          <.icon name="hero-list-bullet" class="size-5" /> Atividades
         </.link>
         <.link
           id="mobile-nav-new-record"
@@ -142,13 +142,6 @@ defmodule ShinobiWeb.Layouts do
           class="flex h-12 flex-col items-center justify-center gap-1 rounded-lg bg-zinc-950 text-xs font-semibold text-white shadow-sm transition hover:bg-zinc-800 dark:bg-emerald-400 dark:text-zinc-950 dark:hover:bg-emerald-300"
         >
           <.icon name="hero-plus" class="size-5" /> Novo
-        </.link>
-        <.link
-          id="mobile-nav-activities"
-          navigate={~p"/atividades"}
-          class="flex h-12 flex-col items-center justify-center gap-1 rounded-lg text-xs font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white"
-        >
-          <.icon name="hero-list-bullet" class="size-5" /> Atividades
         </.link>
       </div>
     </nav>

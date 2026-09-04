@@ -76,13 +76,49 @@ defmodule ShinobiWeb.ActivityLive.Show do
           </div>
         </div>
 
+        <div id="activity-record-summary" class="grid gap-3 sm:grid-cols-3">
+          <div class="rounded-lg border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900/60 dark:bg-emerald-950/30">
+            <p class="text-xs font-semibold uppercase tracking-widest text-emerald-700 dark:text-emerald-300">
+              {@record_label}
+            </p>
+            <p
+              id="activity-best-record-value"
+              class="mt-2 text-3xl font-semibold text-emerald-950 dark:text-emerald-100"
+            >
+              {@record_value}
+            </p>
+            <p
+              :if={@best_record}
+              id="activity-best-record-summary"
+              class="mt-1 text-sm text-emerald-800 dark:text-emerald-200"
+            >
+              {PersonalRecord.result_summary(@best_record)}
+            </p>
+          </div>
+
+          <div class="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
+            <p class="text-xs font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
+              Registros
+            </p>
+            <p
+              id="activity-record-count"
+              class="mt-2 text-3xl font-semibold text-zinc-950 dark:text-zinc-50"
+            >
+              {@record_count_label}
+            </p>
+            <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
+              PRs privados desta atividade.
+            </p>
+          </div>
+        </div>
+
         <div class="flex items-center justify-between">
           <div>
             <p class="text-xs font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
-              Historico
+              Registros
             </p>
             <h2 class="mt-1 text-xl font-semibold text-zinc-950 dark:text-zinc-50">
-              PRs desta atividade
+              Melhor marca primeiro
             </h2>
           </div>
         </div>
@@ -98,15 +134,33 @@ defmodule ShinobiWeb.ActivityLive.Show do
           <article
             :for={{dom_id, record} <- @streams.activity_records}
             id={dom_id}
-            class="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-950"
+            class={[
+              "rounded-lg border p-4 shadow-sm transition",
+              record.id == @best_record_id &&
+                "border-emerald-300 bg-emerald-50/80 dark:border-emerald-700 dark:bg-emerald-950/30",
+              record.id != @best_record_id &&
+                "border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950"
+            ]}
           >
             <div class="flex items-start justify-between gap-3">
               <div>
-                <p class="text-sm font-medium text-zinc-500 dark:text-zinc-400">
-                  {format_date(record.performed_on)}
-                </p>
+                <div class="flex flex-wrap items-center gap-2">
+                  <p class="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+                    {format_date(record.performed_on)}
+                  </p>
+                  <span
+                    :if={record.id == @best_record_id}
+                    id={"activity-current-record-#{record.id}"}
+                    class="inline-flex items-center rounded-md bg-emerald-600 px-2 py-1 text-xs font-semibold text-white dark:bg-emerald-400 dark:text-zinc-950"
+                  >
+                    Recorde atual
+                  </span>
+                </div>
                 <p class="mt-1 text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
                   {PersonalRecord.result_summary(record)}
+                </p>
+                <p class="mt-1 text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                  {@record_label}: {PersonalRecord.primary_result_summary(record)}
                 </p>
               </div>
 
@@ -138,12 +192,19 @@ defmodule ShinobiWeb.ActivityLive.Show do
     activity = Training.get_activity!(socket.assigns.current_scope, id)
 
     records =
-      Training.list_personal_records(socket.assigns.current_scope, activity_id: activity.id)
+      Training.list_personal_records_for_activity(socket.assigns.current_scope, activity)
+
+    best_record = List.first(records)
 
     socket =
       socket
       |> assign(:page_title, activity.name)
       |> assign(:activity, activity)
+      |> assign(:record_label, PersonalRecord.primary_metric_label(activity))
+      |> assign(:record_value, best_record_value(best_record, activity))
+      |> assign(:record_count_label, record_count_label(length(records)))
+      |> assign(:best_record, best_record)
+      |> assign(:best_record_id, best_record && best_record.id)
       |> stream(:activity_records, records)
 
     {:ok, socket}
@@ -164,4 +225,14 @@ defmodule ShinobiWeb.ActivityLive.Show do
   end
 
   defp format_date(date), do: Calendar.strftime(date, "%d/%m/%Y")
+
+  defp best_record_value(nil, _activity), do: "Sem PR"
+
+  defp best_record_value(%PersonalRecord{} = record, %Activity{} = activity) do
+    PersonalRecord.primary_result_summary(record, activity)
+  end
+
+  defp record_count_label(0), do: "sem PR"
+  defp record_count_label(1), do: "1 PR"
+  defp record_count_label(count), do: "#{count} PRs"
 end

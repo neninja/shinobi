@@ -58,19 +58,47 @@ defmodule Shinobi.Training.PersonalRecord do
         "#{format_duration(record.duration_seconds)} / #{format_weight(record.weight_kg)}"
 
       "rounds" ->
-        "#{format_decimal(record.rounds)} voltas"
+        format_rounds(record.rounds)
 
       "rounds_weight" ->
-        "#{format_decimal(record.rounds)} voltas / #{format_weight(record.weight_kg)}"
+        "#{format_rounds(record.rounds)} / #{format_weight(record.weight_kg)}"
 
       "reps" ->
-        "#{record.repetitions} reps"
+        format_repetitions(record.repetitions)
 
       "reps_weight" ->
-        "#{record.repetitions} reps / #{format_weight(record.weight_kg)}"
+        "#{format_repetitions(record.repetitions)} / #{format_weight(record.weight_kg)}"
 
       _ ->
         "-"
+    end
+  end
+
+  def primary_metric_label(%Activity{} = activity) do
+    measurement_type = activity.measurement_type
+
+    cond do
+      Activity.weighted?(measurement_type) -> "Recorde de peso"
+      Activity.time_based?(measurement_type) -> "Recorde de tempo"
+      Activity.reps_based?(measurement_type) -> "Recorde de repeticoes"
+      Activity.rounds_based?(measurement_type) -> "Recorde de voltas"
+      true -> "Recorde"
+    end
+  end
+
+  def primary_result_summary(%__MODULE__{activity: %Activity{} = activity} = record) do
+    primary_result_summary(record, activity)
+  end
+
+  def primary_result_summary(%__MODULE__{} = record, %Activity{} = activity) do
+    measurement_type = activity.measurement_type
+
+    cond do
+      Activity.weighted?(measurement_type) -> format_weight(record.weight_kg)
+      Activity.time_based?(measurement_type) -> format_duration(record.duration_seconds)
+      Activity.reps_based?(measurement_type) -> format_repetitions(record.repetitions)
+      Activity.rounds_based?(measurement_type) -> format_rounds(record.rounds)
+      true -> "-"
     end
   end
 
@@ -91,6 +119,12 @@ defmodule Shinobi.Training.PersonalRecord do
 
   def format_weight(nil), do: "-"
   def format_weight(weight), do: "#{format_decimal(weight)} kg"
+
+  def format_repetitions(nil), do: "-"
+  def format_repetitions(repetitions), do: "#{repetitions} reps"
+
+  def format_rounds(nil), do: "-"
+  def format_rounds(rounds), do: "#{format_decimal(rounds)} voltas"
 
   def format_decimal(nil), do: "-"
 
