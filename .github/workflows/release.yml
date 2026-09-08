@@ -1,0 +1,82 @@
+name: Build Linux x86_64 Release
+
+on:
+  release:
+    types: [published]
+
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  MIX_ENV: prod
+  RELEASE_NAME: shinobi
+  SHINOBI_ARTIFACT_OS: linux
+  SHINOBI_ARTIFACT_ARCH: x86_64
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Erlang and Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: "26"
+          elixir-version: "1.18.4"
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            git \
+            curl \
+            ca-certificates
+
+      - name: Install Hex and Rebar
+        run: |
+          mix local.hex --force
+          mix local.rebar --force
+
+      - name: Build release
+        run: |
+          mix release.prod
+
+      - name: Package published release artifact
+        if: github.event_name == 'release'
+        run: |
+          ./scripts/package-prod-artifact "${{ github.event.release.tag_name }}"
+
+      - name: Package manual release artifact
+        if: github.event_name != 'release'
+        run: |
+          ./scripts/package-prod-artifact
+
+      - name: List release artifacts
+        run: |
+          ls -lh dist
+
+      - name: Upload Actions artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: shinobi-linux-x86_64
+          path: |
+            dist/*.tar.gz
+            dist/*.tar.gz.sha256
+          retention-days: 30
+
+      - name: Attach to GitHub Release
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload \
+            "${{ github.event.release.tag_name }}" \
+            dist/*.tar.gz \
+            dist/*.tar.gz.sha256 \
+            --clobber

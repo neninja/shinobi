@@ -27,7 +27,7 @@ defmodule Shinobi.MixProject do
 
   def cli do
     [
-      preferred_envs: [precommit: :test]
+      preferred_envs: [precommit: :test, "release.prod": :prod]
     ]
   end
 
@@ -94,6 +94,13 @@ defmodule Shinobi.MixProject do
       ],
       setup: ["deps.get", "ecto.setup", "assets.setup", "assets.build"],
       precommit: ["compile --warning-as-errors", "deps.unlock --unused", "format", "test"],
+      "release.prod": [
+        "deps.get --only prod",
+        "assets.setup",
+        "compile",
+        "assets.deploy",
+        "release --overwrite"
+      ],
       server: ["phx.server"]
     ]
   end

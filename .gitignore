@@ -35,3 +35,6 @@ shinobi-*.tar
 npm-debug.log
 /assets/node_modules/
 
+
+dist
+priv/static

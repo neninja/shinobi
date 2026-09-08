@@ -1,0 +1,60 @@
+#!/bin/sh
+set -eu
+
+release_name="${RELEASE_NAME:-shinobi}"
+release_dir="_build/prod/rel/${release_name}"
+dist_dir="dist"
+dist_path="$(pwd)/${dist_dir}"
+
+if [ "$#" -gt 1 ]; then
+  echo "Usage: $0 [artifact_version]" >&2
+  exit 1
+fi
+
+version="${1:-${SHINOBI_ARTIFACT_VERSION:-}}"
+
+if [ -z "${version}" ]; then
+  # Local builds without an explicit release tag still get sortable filenames.
+  version="0.0.0_$(date +%s)"
+fi
+
+case "${version}" in
+  *[!A-Za-z0-9._-]*)
+    echo "Invalid artifact version '${version}'. Use only letters, numbers, dots, underscores, and hyphens." >&2
+    exit 1
+    ;;
+esac
+
+if [ ! -d "${release_dir}" ]; then
+  echo "Release not found at ${release_dir}. Run mix release.prod first." >&2
+  exit 1
+fi
+
+if [ -n "${SHINOBI_ARTIFACT_OS:-}" ]; then
+  os="${SHINOBI_ARTIFACT_OS}"
+elif [ -n "${TERMUX_VERSION:-}" ] ||
+  [ "${PREFIX:-}" = "/data/data/com.termux/files/usr" ] ||
+  [ "$(uname -o 2>/dev/null || true)" = "Android" ]; then
+  os="android"
+else
+  os="$(uname -s | tr '[:upper:]' '[:lower:]')"
+fi
+
+arch="${SHINOBI_ARTIFACT_ARCH:-$(uname -m)}"
+artifact="${release_name}-${version}-${os}-${arch}.tar.gz"
+
+mkdir -p "${dist_path}"
+tar -C "$(dirname "${release_dir}")" -czf "${dist_path}/${artifact}" "$(basename "${release_dir}")"
+
+if command -v sha256sum >/dev/null 2>&1; then
+  (cd "${dist_path}" && sha256sum "${artifact}" > "${artifact}.sha256")
+elif command -v shasum >/dev/null 2>&1; then
+  (cd "${dist_path}" && shasum -a 256 "${artifact}" > "${artifact}.sha256")
+else
+  echo "Neither sha256sum nor shasum is available to generate a checksum." >&2
+  exit 1
+fi
+
+echo "Artifact ready:"
+echo "  ${dist_dir}/${artifact}"
+echo "  ${dist_dir}/${artifact}.sha256"
