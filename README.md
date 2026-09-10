@@ -104,12 +104,13 @@ echo "Release atualizada em ${app_dir}"
 
 Configure um banco, no exemplo abaixo é com o container de [CONTRIBUTING](./CONTRIBUTING.md)
 
-```
-shinobi_home="${SHINOBI_HOME:-${HOME}/shinobi}"
+```sh
+SHINOBI_HOME="${SHINOBI_HOME:-${HOME}/shinobi}"
+SECRET_KEY_BASE_GEN=$(openssl rand -hex 64)
 
-cat > "${shinobi_home}/.env" <<EOF
+cat > "${SHINOBI_HOME}/.env" <<EOF
 MIX_ENV=prod
-PHX_HOST=100.101.89.166
+PHX_HOST=shinobi.selo.fyi
 PHX_SCHEME=http
 PHX_URL_PORT=8080
 PORT=4000
@@ -118,7 +119,7 @@ POOL_SIZE=5
 LANG=C.UTF-8
 LC_ALL=C.UTF-8
 ELIXIR_ERL_OPTIONS=+fnu
-SECRET_KEY_BASE=troque_este_valor_por_um_segredo_fixo_de_64_caracteres_ou_mais
+SECRET_KEY_BASE=${SECRET_KEY_BASE_GEN}
 EOF
 ```
 
