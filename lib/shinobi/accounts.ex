@@ -60,6 +60,12 @@ defmodule Shinobi.Accounts do
   """
   def get_user!(id), do: Repo.get!(User, id)
 
+  @doc """
+  Returns true when the user can access admin-only surfaces.
+  """
+  def admin?(%User{admin: true}), do: true
+  def admin?(_user), do: false
+
   ## User registration
 
   @doc """

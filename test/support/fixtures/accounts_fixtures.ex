@@ -41,6 +41,13 @@ defmodule Shinobi.AccountsFixtures do
     user
   end
 
+  def admin_user_fixture(attrs \\ %{}) do
+    attrs
+    |> user_fixture()
+    |> Ecto.Changeset.change(admin: true)
+    |> Shinobi.Repo.update!()
+  end
+
   def user_scope_fixture do
     user = user_fixture()
     user_scope_fixture(user)

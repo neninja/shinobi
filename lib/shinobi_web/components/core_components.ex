@@ -464,6 +464,13 @@ defmodule ShinobiWeb.CoreComponents do
   end
 
   @doc """
+  Translates Backpex interface text using gettext.
+  """
+  def translate_backpex({msg, opts}) do
+    Gettext.dgettext(ShinobiWeb.Gettext, "backpex", msg, opts)
+  end
+
+  @doc """
   Translates the errors for a field from a keyword list of errors.
   """
   def translate_errors(errors, field) when is_list(errors) do

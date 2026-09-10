@@ -7,6 +7,7 @@ defmodule Shinobi.Accounts.User do
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :confirmed_at, :utc_datetime
+    field :admin, :boolean, default: false
     field :authenticated_at, :utc_datetime, virtual: true
 
     timestamps(type: :utc_datetime)
@@ -29,6 +30,12 @@ defmodule Shinobi.Accounts.User do
     |> validate_email(opts)
   end
 
+  def admin_changeset(user, attrs, _metadata) do
+    user
+    |> cast(attrs, [:email, :admin])
+    |> validate_email(validate_email_changed: false)
+  end
+
   defp validate_email(changeset, opts) do
     changeset =
       changeset
@@ -42,7 +49,15 @@ defmodule Shinobi.Accounts.User do
       changeset
       |> unsafe_validate_unique(:email, Shinobi.Repo)
       |> unique_constraint(:email)
-      |> validate_email_changed()
+      |> maybe_validate_email_changed(opts)
+    else
+      changeset
+    end
+  end
+
+  defp maybe_validate_email_changed(changeset, opts) do
+    if Keyword.get(opts, :validate_email_changed, true) do
+      validate_email_changed(changeset)
     else
       changeset
     end

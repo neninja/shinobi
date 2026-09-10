@@ -231,6 +231,31 @@ defmodule ShinobiWeb.UserAuth do
     end
   end
 
+  def on_mount(:require_admin, _params, session, socket) do
+    socket = mount_current_scope(socket, session)
+
+    cond do
+      Accounts.admin?(socket.assigns.current_scope && socket.assigns.current_scope.user) ->
+        {:cont, socket}
+
+      socket.assigns.current_scope && socket.assigns.current_scope.user ->
+        socket =
+          socket
+          |> Phoenix.LiveView.put_flash(:error, "You must be an admin to access this page.")
+          |> Phoenix.LiveView.redirect(to: ~p"/atividades")
+
+        {:halt, socket}
+
+      true ->
+        socket =
+          socket
+          |> Phoenix.LiveView.put_flash(:error, "You must log in to access this page.")
+          |> Phoenix.LiveView.redirect(to: ~p"/users/log-in")
+
+        {:halt, socket}
+    end
+  end
+
   def on_mount(:require_sudo_mode, _params, session, socket) do
     socket = mount_current_scope(socket, session)
 
@@ -276,6 +301,20 @@ defmodule ShinobiWeb.UserAuth do
       |> put_flash(:error, "You must log in to access this page.")
       |> maybe_store_return_to()
       |> redirect(to: ~p"/users/log-in")
+      |> halt()
+    end
+  end
+
+  @doc """
+  Plug for routes that require the user to be an admin.
+  """
+  def require_admin_user(conn, _opts) do
+    if Accounts.admin?(conn.assigns.current_scope && conn.assigns.current_scope.user) do
+      conn
+    else
+      conn
+      |> put_flash(:error, "You must be an admin to access this page.")
+      |> redirect(to: ~p"/atividades")
       |> halt()
     end
   end

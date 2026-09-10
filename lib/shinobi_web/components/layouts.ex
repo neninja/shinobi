@@ -81,6 +81,14 @@ defmodule ShinobiWeb.Layouts do
           >
             Conta
           </.link>
+          <.link
+            :if={@current_scope.user.admin}
+            id="nav-admin"
+            navigate={~p"/admin/users"}
+            class="rounded-md px-3 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white"
+          >
+            Admin
+          </.link>
           <span class="max-w-44 truncate px-2 text-xs font-medium text-zinc-500 dark:text-zinc-400">
             {@current_scope.user.email}
           </span>
@@ -143,12 +151,38 @@ defmodule ShinobiWeb.Layouts do
         >
           <.icon name="hero-plus" class="size-5" /> Novo
         </.link>
+        <.link
+          :if={@current_scope.user.admin}
+          id="mobile-nav-admin"
+          navigate={~p"/admin/users"}
+          class="col-span-2 flex h-12 flex-col items-center justify-center gap-1 rounded-lg text-xs font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white"
+        >
+          <.icon name="hero-shield-check" class="size-5" /> Admin
+        </.link>
       </div>
     </nav>
 
     <.flash_group flash={@flash} />
     """
   end
+
+  attr :flash, :map, required: true, doc: "the map of flash messages"
+  attr :socket, :any, required: true, doc: "the socket"
+  attr :live_resource, :atom, default: nil, doc: "Backpex live resource module"
+  attr :fluid?, :boolean, default: true, doc: "if the content uses full width"
+  attr :current_url, :string, required: true, doc: "the current url"
+  attr :current_theme, :string, default: nil, doc: "the currently selected theme"
+  attr :sidebar_open, :boolean, default: true, doc: "initial sidebar open state"
+  attr :sidebar_section_states, :map, default: %{}, doc: "map of sidebar section open states"
+  attr :preferences_manifest, :map, default: nil, doc: "signed client namespace manifest"
+
+  attr :current_scope, :map,
+    default: nil,
+    doc: "the current [scope](https://hexdocs.pm/phoenix/scopes.html)"
+
+  slot :inner_block, required: true
+
+  def admin(assigns)
 
   @doc """
   Shows the flash group with standard titles and content.

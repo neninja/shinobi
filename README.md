@@ -162,3 +162,17 @@ set +a
 
 "${HOME}/shinobi/app/bin/server"
 ```
+
+---
+
+```sh
+iex -S mix
+
+alias Shinobi.{Accounts, Repo}
+
+Accounts.get_user_by_email("seu-email@example.com")
+
+user
+|> Ecto.Changeset.change(admin: true)
+|> Repo.update!()
+```

@@ -24,6 +24,11 @@ config :shinobi,
   ecto_repos: [Shinobi.Repo],
   generators: [timestamp_type: :utc_datetime]
 
+config :backpex,
+  pubsub_server: Shinobi.PubSub,
+  translator_function: {ShinobiWeb.CoreComponents, :translate_backpex},
+  error_translator_function: {ShinobiWeb.CoreComponents, :translate_error}
+
 # Configures the endpoint
 config :shinobi, ShinobiWeb.Endpoint,
   url: [host: "localhost"],

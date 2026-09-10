@@ -39,6 +39,28 @@ defmodule Shinobi.Training.PersonalRecord do
     |> validate_result(activity.measurement_type)
   end
 
+  def admin_changeset(record, attrs, _metadata) do
+    record
+    |> cast(attrs, [
+      :user_id,
+      :activity_id,
+      :performed_on,
+      :duration_seconds,
+      :rounds,
+      :repetitions,
+      :weight_kg,
+      :notes
+    ])
+    |> validate_required([:user_id, :activity_id, :performed_on])
+    |> validate_length(:notes, max: 1_000)
+    |> validate_number(:duration_seconds, greater_than: 0)
+    |> validate_number(:rounds, greater_than: 0)
+    |> validate_number(:repetitions, greater_than: 0)
+    |> validate_number(:weight_kg, greater_than: 0)
+    |> foreign_key_constraint(:user_id)
+    |> foreign_key_constraint(:activity_id)
+  end
+
   def with_duration_parts(%__MODULE__{duration_seconds: nil} = record) do
     %{record | time_minutes: nil, time_seconds: nil}
   end

@@ -59,6 +59,18 @@ defmodule Shinobi.Training.Activity do
   def changeset(activity, attrs) do
     activity
     |> cast(attrs, [:name, :description, :measurement_type])
+    |> validate_activity()
+  end
+
+  def admin_changeset(activity, attrs, _metadata) do
+    activity
+    |> cast(attrs, [:user_id, :name, :description, :measurement_type])
+    |> validate_activity()
+    |> foreign_key_constraint(:user_id)
+  end
+
+  defp validate_activity(changeset) do
+    changeset
     |> validate_required([:name, :measurement_type])
     |> validate_length(:name, max: 120)
     |> validate_length(:description, max: 1_000)

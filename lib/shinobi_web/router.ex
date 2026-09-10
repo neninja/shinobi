@@ -2,6 +2,7 @@ defmodule ShinobiWeb.Router do
   use ShinobiWeb, :router
 
   import ShinobiWeb.UserAuth
+  import Backpex.Router
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -15,6 +16,19 @@ defmodule ShinobiWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+  end
+
+  scope "/admin", ShinobiWeb do
+    pipe_through [:browser, :require_authenticated_user, :require_admin_user]
+
+    backpex_routes()
+
+    live_session :admin,
+      on_mount: [{ShinobiWeb.UserAuth, :require_admin}, Backpex.InitAssigns] do
+      live_resources "/users", Admin.UserLive
+      live_resources "/activities", Admin.ActivityLive
+      live_resources "/records", Admin.PersonalRecordLive
+    end
   end
 
   scope "/", ShinobiWeb do
