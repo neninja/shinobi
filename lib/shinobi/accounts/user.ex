@@ -30,6 +30,16 @@ defmodule Shinobi.Accounts.User do
     |> validate_email(opts)
   end
 
+  @doc """
+  A user changeset for registering with email and password.
+  """
+  def registration_changeset(user, attrs, opts \\ []) do
+    user
+    |> email_changeset(attrs, opts)
+    |> password_changeset(attrs, Keyword.put_new(opts, :require_password_confirmation, true))
+    |> maybe_confirm_registration(opts)
+  end
+
   def admin_changeset(user, attrs, _metadata) do
     user
     |> cast(attrs, [:email, :admin])
@@ -89,7 +99,10 @@ defmodule Shinobi.Accounts.User do
   def password_changeset(user, attrs, opts \\ []) do
     user
     |> cast(attrs, [:password])
-    |> validate_confirmation(:password, message: "does not match password")
+    |> validate_confirmation(:password,
+      message: "does not match password",
+      required: Keyword.get(opts, :require_password_confirmation, false)
+    )
     |> validate_password(opts)
   end
 
@@ -116,6 +129,14 @@ defmodule Shinobi.Accounts.User do
       # would keep the database transaction open longer and hurt performance.
       |> put_change(:hashed_password, Bcrypt.hash_pwd_salt(password))
       |> delete_change(:password)
+    else
+      changeset
+    end
+  end
+
+  defp maybe_confirm_registration(changeset, opts) do
+    if Keyword.get(opts, :confirm, true) and changeset.valid? do
+      put_change(changeset, :confirmed_at, DateTime.utc_now(:second))
     else
       changeset
     end

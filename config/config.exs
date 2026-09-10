@@ -24,6 +24,10 @@ config :shinobi,
   ecto_repos: [Shinobi.Repo],
   generators: [timestamp_type: :utc_datetime]
 
+config :shinobi, :auth,
+  magic_link_enabled?: false,
+  email_delivery_enabled?: false
+
 config :backpex,
   pubsub_server: Shinobi.PubSub,
   translator_function: {ShinobiWeb.CoreComponents, :translate_backpex},

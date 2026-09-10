@@ -7,36 +7,36 @@ defmodule Shinobi.AccountsFixtures do
   import Ecto.Query
 
   alias Shinobi.Accounts
+  alias Shinobi.Accounts.User
   alias Shinobi.Accounts.Scope
 
   def unique_user_email, do: "user#{System.unique_integer()}@example.com"
   def valid_user_password, do: "hello world!"
 
   def valid_user_attributes(attrs \\ %{}) do
+    attrs = Enum.into(attrs, %{})
+    password = attrs[:password] || attrs["password"] || valid_user_password()
+
     Enum.into(attrs, %{
-      email: unique_user_email()
+      email: unique_user_email(),
+      password: password,
+      password_confirmation: password
     })
   end
 
   def unconfirmed_user_fixture(attrs \\ %{}) do
+    attrs = Enum.into(attrs, %{email: unique_user_email()})
+
+    %User{}
+    |> User.email_changeset(attrs)
+    |> Shinobi.Repo.insert!()
+  end
+
+  def user_fixture(attrs \\ %{}) do
     {:ok, user} =
       attrs
       |> valid_user_attributes()
       |> Accounts.register_user()
-
-    user
-  end
-
-  def user_fixture(attrs \\ %{}) do
-    user = unconfirmed_user_fixture(attrs)
-
-    token =
-      extract_user_token(fn url ->
-        Accounts.deliver_login_instructions(user, url)
-      end)
-
-    {:ok, {user, _expired_tokens}} =
-      Accounts.login_user_by_magic_link(token)
 
     user
   end

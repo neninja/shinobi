@@ -74,15 +74,22 @@ defmodule ShinobiWeb.UserLive.Confirmation do
 
   @impl true
   def mount(%{"token" => token}, _session, socket) do
-    if user = Accounts.get_user_by_magic_link_token(token) do
-      form = to_form(%{"token" => token}, as: "user")
+    if Accounts.magic_link_enabled?() do
+      if user = Accounts.get_user_by_magic_link_token(token) do
+        form = to_form(%{"token" => token}, as: "user")
 
-      {:ok, assign(socket, user: user, form: form, trigger_submit: false),
-       temporary_assigns: [form: nil]}
+        {:ok, assign(socket, user: user, form: form, trigger_submit: false),
+         temporary_assigns: [form: nil]}
+      else
+        {:ok,
+         socket
+         |> put_flash(:error, "Magic link is invalid or it has expired.")
+         |> push_navigate(to: ~p"/users/log-in")}
+      end
     else
       {:ok,
        socket
-       |> put_flash(:error, "Magic link is invalid or it has expired.")
+       |> put_flash(:error, "Magic link login is disabled.")
        |> push_navigate(to: ~p"/users/log-in")}
     end
   end

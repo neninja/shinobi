@@ -72,12 +72,16 @@ defmodule ShinobiWeb.UserLive.Settings do
   @impl true
   def mount(%{"token" => token}, _session, socket) do
     socket =
-      case Accounts.update_user_email(socket.assigns.current_scope.user, token) do
-        {:ok, _user} ->
-          put_flash(socket, :info, "Email changed successfully.")
+      if Accounts.email_delivery_enabled?() do
+        case Accounts.update_user_email(socket.assigns.current_scope.user, token) do
+          {:ok, _user} ->
+            put_flash(socket, :info, "Email changed successfully.")
 
-        {:error, _} ->
-          put_flash(socket, :error, "Email change link is invalid or it has expired.")
+          {:error, _} ->
+            put_flash(socket, :error, "Email change link is invalid or it has expired.")
+        end
+      else
+        put_flash(socket, :error, "Email confirmation links are disabled.")
       end
 
     {:ok, push_navigate(socket, to: ~p"/users/settings")}
@@ -116,19 +120,10 @@ defmodule ShinobiWeb.UserLive.Settings do
     user = socket.assigns.current_scope.user
     true = Accounts.sudo_mode?(user)
 
-    case Accounts.change_user_email(user, user_params) do
-      %{valid?: true} = changeset ->
-        Accounts.deliver_user_update_email_instructions(
-          Ecto.Changeset.apply_action!(changeset, :insert),
-          user.email,
-          &url(~p"/users/settings/confirm-email/#{&1}")
-        )
-
-        info = "A link to confirm your email change has been sent to the new address."
-        {:noreply, socket |> put_flash(:info, info)}
-
-      changeset ->
-        {:noreply, assign(socket, :email_form, to_form(changeset, action: :insert))}
+    if Accounts.email_delivery_enabled?() do
+      update_email_with_confirmation(socket, user, user_params)
+    else
+      update_email_now(socket, user, user_params)
     end
   end
 
@@ -155,6 +150,42 @@ defmodule ShinobiWeb.UserLive.Settings do
 
       changeset ->
         {:noreply, assign(socket, password_form: to_form(changeset, action: :insert))}
+    end
+  end
+
+  defp update_email_with_confirmation(socket, user, user_params) do
+    case Accounts.change_user_email(user, user_params) do
+      %{valid?: true} = changeset ->
+        Accounts.deliver_user_update_email_instructions(
+          Ecto.Changeset.apply_action!(changeset, :insert),
+          user.email,
+          &url(~p"/users/settings/confirm-email/#{&1}")
+        )
+
+        info = "A link to confirm your email change has been sent to the new address."
+        {:noreply, socket |> put_flash(:info, info)}
+
+      changeset ->
+        {:noreply, assign(socket, :email_form, to_form(changeset, action: :insert))}
+    end
+  end
+
+  defp update_email_now(socket, user, user_params) do
+    case Accounts.update_user_email_now(user, user_params) do
+      {:ok, updated_user} ->
+        updated_user = %{updated_user | authenticated_at: user.authenticated_at}
+        current_scope = %{socket.assigns.current_scope | user: updated_user}
+        email_changeset = Accounts.change_user_email(updated_user, %{}, validate_unique: false)
+
+        {:noreply,
+         socket
+         |> assign(:current_scope, current_scope)
+         |> assign(:current_email, updated_user.email)
+         |> assign(:email_form, to_form(email_changeset))
+         |> put_flash(:info, "Email changed successfully.")}
+
+      {:error, changeset} ->
+        {:noreply, assign(socket, :email_form, to_form(changeset, action: :insert))}
     end
   end
 end

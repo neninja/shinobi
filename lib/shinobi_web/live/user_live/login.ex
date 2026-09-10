@@ -25,7 +25,7 @@ defmodule ShinobiWeb.UserLive.Login do
           </.header>
         </div>
 
-        <div :if={local_mail_adapter?()} class="alert alert-info">
+        <div :if={@email_delivery_enabled? && local_mail_adapter?()} class="alert alert-info">
           <.icon name="hero-information-circle" class="size-6 shrink-0" />
           <div>
             <p>You are running the local mail adapter.</p>
@@ -36,7 +36,7 @@ defmodule ShinobiWeb.UserLive.Login do
         </div>
 
         <.form
-          :let={f}
+          :if={@magic_link_enabled?}
           for={@form}
           id="login_form_magic"
           action={~p"/users/log-in"}
@@ -44,7 +44,7 @@ defmodule ShinobiWeb.UserLive.Login do
         >
           <.input
             readonly={!!@current_scope}
-            field={f[:email]}
+            field={@form[:email]}
             type="email"
             label="Email"
             autocomplete="username"
@@ -57,10 +57,9 @@ defmodule ShinobiWeb.UserLive.Login do
           </.button>
         </.form>
 
-        <div class="divider">or</div>
+        <div :if={@magic_link_enabled?} class="divider">or</div>
 
         <.form
-          :let={f}
           for={@form}
           id="login_form_password"
           action={~p"/users/log-in"}
@@ -69,12 +68,13 @@ defmodule ShinobiWeb.UserLive.Login do
         >
           <.input
             readonly={!!@current_scope}
-            field={f[:email]}
+            field={@form[:email]}
             type="email"
             label="Email"
             autocomplete="username"
             spellcheck="false"
             required
+            phx-mounted={if(@magic_link_enabled?, do: nil, else: JS.focus())}
           />
           <.input
             field={@form[:password]}
@@ -103,7 +103,12 @@ defmodule ShinobiWeb.UserLive.Login do
 
     form = to_form(%{"email" => email}, as: "user")
 
-    {:ok, assign(socket, form: form, trigger_submit: false)}
+    {:ok,
+     socket
+     |> assign(:form, form)
+     |> assign(:trigger_submit, false)
+     |> assign(:magic_link_enabled?, Accounts.magic_link_enabled?())
+     |> assign(:email_delivery_enabled?, Accounts.email_delivery_enabled?())}
   end
 
   @impl true
@@ -112,20 +117,27 @@ defmodule ShinobiWeb.UserLive.Login do
   end
 
   def handle_event("submit_magic", %{"user" => %{"email" => email}}, socket) do
-    if user = Accounts.get_user_by_email(email) do
-      Accounts.deliver_login_instructions(
-        user,
-        &url(~p"/users/log-in/#{&1}")
-      )
+    if Accounts.magic_link_enabled?() do
+      if user = Accounts.get_user_by_email(email) do
+        Accounts.deliver_login_instructions(
+          user,
+          &url(~p"/users/log-in/#{&1}")
+        )
+      end
+
+      info =
+        "If your email is in our system, you will receive instructions for logging in shortly."
+
+      {:noreply,
+       socket
+       |> put_flash(:info, info)
+       |> push_navigate(to: ~p"/users/log-in")}
+    else
+      {:noreply,
+       socket
+       |> put_flash(:error, "Magic link login is disabled.")
+       |> push_navigate(to: ~p"/users/log-in")}
     end
-
-    info =
-      "If your email is in our system, you will receive instructions for logging in shortly."
-
-    {:noreply,
-     socket
-     |> put_flash(:info, info)
-     |> push_navigate(to: ~p"/users/log-in")}
   end
 
   defp local_mail_adapter? do

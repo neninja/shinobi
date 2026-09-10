@@ -55,6 +55,22 @@ defmodule Shinobi.AccountsTest do
       assert %{email: ["can't be blank"]} = errors_on(changeset)
     end
 
+    test "requires password to be set" do
+      {:error, changeset} = Accounts.register_user(%{email: unique_user_email()})
+
+      assert %{password: ["can't be blank"]} = errors_on(changeset)
+    end
+
+    test "requires password confirmation" do
+      {:error, changeset} =
+        Accounts.register_user(%{
+          email: unique_user_email(),
+          password: valid_user_password()
+        })
+
+      assert %{password_confirmation: ["does not match password"]} = errors_on(changeset)
+    end
+
     test "validates email when given" do
       {:error, changeset} = Accounts.register_user(%{email: "not valid"})
 
@@ -77,13 +93,15 @@ defmodule Shinobi.AccountsTest do
       assert "has already been taken" in errors_on(changeset).email
     end
 
-    test "registers users without password" do
+    test "registers users with password and marks them confirmed" do
       email = unique_user_email()
       {:ok, user} = Accounts.register_user(valid_user_attributes(email: email))
       assert user.email == email
-      assert is_nil(user.hashed_password)
-      assert is_nil(user.confirmed_at)
+      assert user.hashed_password
+      assert user.confirmed_at
       assert is_nil(user.password)
+      assert Accounts.get_user_by_email_and_password(email, valid_user_password())
+      refute Repo.get_by(UserToken, user_id: user.id)
     end
   end
 
@@ -118,65 +136,56 @@ defmodule Shinobi.AccountsTest do
       %{user: user_fixture()}
     end
 
-    test "sends token through notification", %{user: user} do
-      token =
-        extract_user_token(fn url ->
-          Accounts.deliver_user_update_email_instructions(user, "current@example.com", url)
-        end)
+    test "is disabled when email delivery is disabled", %{user: user} do
+      assert {:error, :disabled} =
+               Accounts.deliver_user_update_email_instructions(
+                 user,
+                 "current@example.com",
+                 & &1
+               )
 
-      {:ok, token} = Base.url_decode64(token, padding: false)
-      assert user_token = Repo.get_by(UserToken, token: :crypto.hash(:sha256, token))
-      assert user_token.user_id == user.id
-      assert user_token.sent_to == user.email
-      assert user_token.context == "change:current@example.com"
+      refute Repo.get_by(UserToken, user_id: user.id)
     end
   end
 
-  describe "update_user_email/2" do
+  describe "update_user_email_now/2" do
     setup do
-      user = unconfirmed_user_fixture()
+      user = user_fixture()
       email = unique_user_email()
 
-      token =
-        extract_user_token(fn url ->
-          Accounts.deliver_user_update_email_instructions(%{user | email: email}, user.email, url)
-        end)
-
-      %{user: user, token: token, email: email}
+      %{user: user, email: email}
     end
 
-    test "updates the email with a valid token", %{user: user, token: token, email: email} do
-      assert {:ok, %{email: ^email}} = Accounts.update_user_email(user, token)
+    test "updates the email", %{user: user, email: email} do
+      assert {:ok, %{email: ^email}} = Accounts.update_user_email_now(user, %{email: email})
       changed_user = Repo.get!(User, user.id)
       assert changed_user.email != user.email
       assert changed_user.email == email
       refute Repo.get_by(UserToken, user_id: user.id)
     end
 
-    test "does not update email with invalid token", %{user: user} do
-      assert Accounts.update_user_email(user, "oops") ==
-               {:error, :transaction_aborted}
+    test "does not update email with invalid data", %{user: user} do
+      assert {:error, changeset} = Accounts.update_user_email_now(user, %{email: "oops"})
 
+      assert %{email: ["must have the @ sign and no spaces"]} = errors_on(changeset)
       assert Repo.get!(User, user.id).email == user.email
-      assert Repo.get_by(UserToken, user_id: user.id)
     end
 
-    test "does not update email if user email changed", %{user: user, token: token} do
-      assert Accounts.update_user_email(%{user | email: "current@example.com"}, token) ==
-               {:error, :transaction_aborted}
+    test "does not update email when it is already taken", %{user: user} do
+      %{email: taken_email} = user_fixture()
 
+      assert {:error, changeset} = Accounts.update_user_email_now(user, %{email: taken_email})
+
+      assert "has already been taken" in errors_on(changeset).email
       assert Repo.get!(User, user.id).email == user.email
-      assert Repo.get_by(UserToken, user_id: user.id)
     end
+  end
 
-    test "does not update email if token expired", %{user: user, token: token} do
-      {1, nil} = Repo.update_all(UserToken, set: [inserted_at: ~N[2020-01-01 00:00:00]])
+  describe "update_user_email/2" do
+    test "is disabled when email delivery is disabled" do
+      user = user_fixture()
 
-      assert Accounts.update_user_email(user, token) ==
-               {:error, :transaction_aborted}
-
-      assert Repo.get!(User, user.id).email == user.email
-      assert Repo.get_by(UserToken, user_id: user.id)
+      assert Accounts.update_user_email(user, "token") == {:error, :disabled}
     end
   end
 
@@ -308,56 +317,14 @@ defmodule Shinobi.AccountsTest do
   end
 
   describe "get_user_by_magic_link_token/1" do
-    setup do
-      user = user_fixture()
-      {encoded_token, _hashed_token} = generate_user_magic_link_token(user)
-      %{user: user, token: encoded_token}
-    end
-
-    test "returns user by token", %{user: user, token: token} do
-      assert session_user = Accounts.get_user_by_magic_link_token(token)
-      assert session_user.id == user.id
-    end
-
-    test "does not return user for invalid token" do
+    test "is disabled when magic link login is disabled" do
       refute Accounts.get_user_by_magic_link_token("oops")
-    end
-
-    test "does not return user for expired token", %{token: token} do
-      {1, nil} = Repo.update_all(UserToken, set: [inserted_at: ~N[2020-01-01 00:00:00]])
-      refute Accounts.get_user_by_magic_link_token(token)
     end
   end
 
   describe "login_user_by_magic_link/1" do
-    test "confirms user and expires tokens" do
-      user = unconfirmed_user_fixture()
-      refute user.confirmed_at
-      {encoded_token, hashed_token} = generate_user_magic_link_token(user)
-
-      assert {:ok, {user, [%{token: ^hashed_token}]}} =
-               Accounts.login_user_by_magic_link(encoded_token)
-
-      assert user.confirmed_at
-    end
-
-    test "returns user and (deleted) token for confirmed user" do
-      user = user_fixture()
-      assert user.confirmed_at
-      {encoded_token, _hashed_token} = generate_user_magic_link_token(user)
-      assert {:ok, {^user, []}} = Accounts.login_user_by_magic_link(encoded_token)
-      # one time use only
-      assert {:error, :not_found} = Accounts.login_user_by_magic_link(encoded_token)
-    end
-
-    test "raises when unconfirmed user has password set" do
-      user = unconfirmed_user_fixture()
-      {1, nil} = Repo.update_all(User, set: [hashed_password: "hashed"])
-      {encoded_token, _hashed_token} = generate_user_magic_link_token(user)
-
-      assert_raise RuntimeError, ~r/magic link log in is not allowed/, fn ->
-        Accounts.login_user_by_magic_link(encoded_token)
-      end
+    test "is disabled when magic link login is disabled" do
+      assert Accounts.login_user_by_magic_link("token") == {:error, :disabled}
     end
   end
 
@@ -372,20 +339,12 @@ defmodule Shinobi.AccountsTest do
 
   describe "deliver_login_instructions/2" do
     setup do
-      %{user: unconfirmed_user_fixture()}
+      %{user: user_fixture()}
     end
 
-    test "sends token through notification", %{user: user} do
-      token =
-        extract_user_token(fn url ->
-          Accounts.deliver_login_instructions(user, url)
-        end)
-
-      {:ok, token} = Base.url_decode64(token, padding: false)
-      assert user_token = Repo.get_by(UserToken, token: :crypto.hash(:sha256, token))
-      assert user_token.user_id == user.id
-      assert user_token.sent_to == user.email
-      assert user_token.context == "login"
+    test "is disabled when magic link login is disabled", %{user: user} do
+      assert Accounts.deliver_login_instructions(user, & &1) == {:error, :disabled}
+      refute Repo.get_by(UserToken, user_id: user.id)
     end
   end
 

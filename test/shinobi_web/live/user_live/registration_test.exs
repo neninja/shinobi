@@ -4,12 +4,15 @@ defmodule ShinobiWeb.UserLive.RegistrationTest do
   import Phoenix.LiveViewTest
   import Shinobi.AccountsFixtures
 
+  alias Shinobi.Accounts
+
   describe "Registration page" do
     test "renders registration page", %{conn: conn} do
       {:ok, _lv, html} = live(conn, ~p"/users/register")
 
       assert html =~ "Register"
       assert html =~ "Log in"
+      assert html =~ "Password"
     end
 
     test "redirects if already logged in", %{conn: conn} do
@@ -36,7 +39,7 @@ defmodule ShinobiWeb.UserLive.RegistrationTest do
   end
 
   describe "register user" do
-    test "creates account but does not log in", %{conn: conn} do
+    test "creates account with password but does not log in", %{conn: conn} do
       {:ok, lv, _html} = live(conn, ~p"/users/register")
 
       email = unique_user_email()
@@ -46,8 +49,12 @@ defmodule ShinobiWeb.UserLive.RegistrationTest do
         render_submit(form)
         |> follow_redirect(conn, ~p"/users/log-in")
 
-      assert html =~
-               ~r/An email was sent to .*, please access it to confirm your account/
+      assert html =~ "Account created successfully. You can log in now."
+
+      assert user = Accounts.get_user_by_email(email)
+      assert user.confirmed_at
+      assert Accounts.get_user_by_email_and_password(email, valid_user_password())
+      refute Shinobi.Repo.get_by(Shinobi.Accounts.UserToken, user_id: user.id)
     end
 
     test "renders errors for duplicated email", %{conn: conn} do
@@ -58,7 +65,7 @@ defmodule ShinobiWeb.UserLive.RegistrationTest do
       result =
         lv
         |> form("#registration_form",
-          user: %{"email" => user.email}
+          user: valid_user_attributes(email: user.email)
         )
         |> render_submit()
 
