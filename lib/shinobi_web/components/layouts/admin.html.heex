@@ -1,69 +1,74 @@
-<Backpex.HTML.Layout.app_shell
-  socket={@socket}
-  fluid={@fluid?}
-  live_resource={@live_resource}
-  sidebar_open={@sidebar_open}
-  preferences_manifest={@preferences_manifest}
->
-  <:topbar>
-    <div class="flex-1"></div>
+<div id="admin-theme-root" data-theme="light" class="min-h-screen">
+  <Backpex.HTML.Layout.app_shell
+    socket={@socket}
+    fluid={@fluid?}
+    live_resource={@live_resource}
+    sidebar_open={@sidebar_open}
+    preferences_manifest={@preferences_manifest}
+  >
+    <:topbar>
+      <div class="flex-1"></div>
 
-    <span
-      :if={@current_scope && @current_scope.user}
-      id="admin-current-user"
-      class="mr-3 hidden max-w-64 truncate text-sm text-base-content/70 sm:block"
-    >
-      {@current_scope.user.email}
-    </span>
-
-    <.link
-      id="admin-exit-app"
-      navigate={~p"/atividades"}
-      class="btn btn-ghost btn-sm"
-    >
-      <.icon name="hero-arrow-left" class="size-4" /> App
-    </.link>
-
-    <.link
-      id="admin-logout"
-      href={~p"/users/log-out"}
-      method="delete"
-      class="btn btn-ghost btn-sm text-error"
-    >
-      <.icon name="hero-arrow-right-on-rectangle" class="size-4" /> Sair
-    </.link>
-  </:topbar>
-
-  <:sidebar_branding>
-    <.link
-      id="admin-home-link"
-      navigate={~p"/admin/users"}
-      class="flex h-16 items-center gap-3 border-b border-base-300 px-4 text-base-content"
-    >
-      <span class="inline-flex size-9 items-center justify-center rounded bg-base-content text-sm font-semibold text-base-100">
-        S
+      <span
+        :if={@current_scope && @current_scope.user}
+        id="admin-current-user"
+        class="mr-3 hidden max-w-64 truncate text-sm text-base-content/70 sm:block"
+      >
+        {@current_scope.user.email}
       </span>
-      <span class="min-w-0">
-        <span class="block truncate text-sm font-semibold">Shinobi</span>
-        <span class="block truncate text-xs text-base-content/60">Admin</span>
-      </span>
-    </.link>
-  </:sidebar_branding>
 
-  <:sidebar>
-    <Backpex.HTML.Layout.sidebar_item current_url={@current_url} navigate={~p"/admin/users"}>
-      <.icon name="hero-users" class="size-5" /> Usuarios
-    </Backpex.HTML.Layout.sidebar_item>
+      <.link
+        id="admin-exit-app"
+        navigate={~p"/atividades"}
+        class="btn btn-ghost btn-sm"
+      >
+        <.icon name="hero-arrow-left" class="size-4" /> App
+      </.link>
 
-    <Backpex.HTML.Layout.sidebar_item current_url={@current_url} navigate={~p"/admin/activities"}>
-      <.icon name="hero-list-bullet" class="size-5" /> Atividades
-    </Backpex.HTML.Layout.sidebar_item>
+      <.link
+        id="admin-logout"
+        href={~p"/users/log-out"}
+        method="delete"
+        class="btn btn-ghost btn-sm text-error"
+      >
+        <.icon name="hero-arrow-right-on-rectangle" class="size-4" /> Sair
+      </.link>
+    </:topbar>
 
-    <Backpex.HTML.Layout.sidebar_item current_url={@current_url} navigate={~p"/admin/records"}>
-      <.icon name="hero-trophy" class="size-5" /> Registros
-    </Backpex.HTML.Layout.sidebar_item>
-  </:sidebar>
+    <:sidebar_branding>
+      <.link
+        id="admin-home-link"
+        navigate={~p"/admin/users"}
+        class="flex h-16 items-center gap-3 border-b border-base-300 px-4 text-base-content"
+      >
+        <span class="inline-flex size-9 items-center justify-center rounded bg-base-content text-sm font-semibold text-base-100">
+          S
+        </span>
+        <span class="min-w-0">
+          <span class="block truncate text-sm font-semibold">Shinobi</span>
+          <span class="block truncate text-xs text-base-content/60">Admin</span>
+        </span>
+      </.link>
+    </:sidebar_branding>
 
-  <Backpex.HTML.Layout.flash_messages flash={@flash} />
-  {render_slot(@inner_block)}
-</Backpex.HTML.Layout.app_shell>
+    <:sidebar>
+      <Backpex.HTML.Layout.sidebar_item current_url={@current_url} navigate={~p"/admin/users"}>
+        <.icon name="hero-users" class="size-5" /> Usuarios
+      </Backpex.HTML.Layout.sidebar_item>
+
+      <Backpex.HTML.Layout.sidebar_item
+        current_url={@current_url}
+        navigate={~p"/admin/activities"}
+      >
+        <.icon name="hero-list-bullet" class="size-5" /> Atividades
+      </Backpex.HTML.Layout.sidebar_item>
+
+      <Backpex.HTML.Layout.sidebar_item current_url={@current_url} navigate={~p"/admin/records"}>
+        <.icon name="hero-trophy" class="size-5" /> Registros
+      </Backpex.HTML.Layout.sidebar_item>
+    </:sidebar>
+
+    <Backpex.HTML.Layout.flash_messages flash={@flash} />
+    {render_slot(@inner_block)}
+  </Backpex.HTML.Layout.app_shell>
+</div>

@@ -104,6 +104,28 @@
 /* Make LiveView wrapper divs transparent for layout */
 [data-phx-session], [data-phx-teleported-src] { display: contents }
 
+#admin-theme-root {
+  color-scheme: light;
+}
+
+#admin-theme-root input,
+#admin-theme-root select,
+#admin-theme-root textarea {
+  color-scheme: light;
+}
+
+#admin-theme-root input:not([type="checkbox"]):not([type="radio"]),
+#admin-theme-root select,
+#admin-theme-root textarea {
+  background-color: var(--color-base-100);
+  color: var(--color-base-content);
+}
+
+#admin-theme-root input::placeholder,
+#admin-theme-root textarea::placeholder {
+  color: color-mix(in oklab, var(--color-base-content) 45%, transparent);
+}
+
 .activity-history-chart .plotto-chart {
   display: block;
   height: auto;

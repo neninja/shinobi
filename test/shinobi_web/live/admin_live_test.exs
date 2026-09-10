@@ -21,6 +21,7 @@ defmodule ShinobiWeb.AdminLiveTest do
 
     {:ok, view, _html} = live(conn, ~p"/admin/users")
 
+    assert has_element?(view, "#admin-theme-root[data-theme='light']")
     assert has_element?(view, "#backpex-app-shell")
     assert has_element?(view, "#admin-current-user")
     assert has_element?(view, "a[href='/admin/activities']")
