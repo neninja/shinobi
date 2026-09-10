@@ -137,6 +137,35 @@ defmodule Shinobi.TrainingTest do
       assert Enum.map(records, & &1.id) == [heavy.id, middle.id, light.id]
     end
 
+    test "lists a time activity history with the shortest record first" do
+      scope = user_scope_fixture()
+      other_scope = user_scope_fixture()
+      activity = global_activity_fixture(name: "Run 1K", measurement_type: "time")
+
+      slow = personal_record_fixture(scope, activity, time_minutes: "7", time_seconds: "42")
+      fast = personal_record_fixture(scope, activity, time_minutes: "5", time_seconds: "30")
+      middle = personal_record_fixture(scope, activity, time_minutes: "6", time_seconds: "15")
+      personal_record_fixture(other_scope, activity, time_minutes: "4", time_seconds: "10")
+
+      records = Training.list_personal_records_for_activity(scope, activity)
+
+      assert Enum.map(records, & &1.id) == [fast.id, middle.id, slow.id]
+    end
+
+    test "uses the shortest duration as the best record for time activities" do
+      scope = user_scope_fixture()
+      activity = global_activity_fixture(name: "Sprint", measurement_type: "time")
+
+      slow = personal_record_fixture(scope, activity, time_minutes: "7", time_seconds: "42")
+      fast = personal_record_fixture(scope, activity, time_minutes: "5", time_seconds: "30")
+
+      summaries = Training.list_activity_summaries(scope, search: "Sprint")
+
+      assert [%{best_record: best_record, record_value: "5:30", records_count: 2}] = summaries
+      assert best_record.id == fast.id
+      refute best_record.id == slow.id
+    end
+
     test "updates a PR activity and clears fields that no longer apply" do
       scope = user_scope_fixture()
       reps_activity = global_activity_fixture(measurement_type: "reps_weight")

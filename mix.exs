@@ -53,6 +53,7 @@ defmodule Shinobi.MixProject do
       {:esbuild, "~> 0.10", runtime: Mix.env() == :dev},
       {:tailwind, "~> 0.3", runtime: Mix.env() == :dev},
       {:backpex, "~> 0.19"},
+      {:plotto, "~> 0.6.0"},
       {:heroicons,
        github: "tailwindlabs/heroicons",
        tag: "v2.2.0",

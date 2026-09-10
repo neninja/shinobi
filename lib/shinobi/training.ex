@@ -234,7 +234,8 @@ defmodule Shinobi.Training do
         :lt
 
       true ->
-        compare_metric_values(left.best_metric_value, right.best_metric_value)
+        direction = activity_summary_metric_direction(left.activity, right.activity)
+        compare_metric_values(left.best_metric_value, right.best_metric_value, direction)
     end
   end
 
@@ -267,12 +268,15 @@ defmodule Shinobi.Training do
     primary_comparison =
       left
       |> metric_value(activity)
-      |> compare_metric_values(metric_value(right, activity))
+      |> compare_metric_values(metric_value(right, activity), primary_metric_direction(activity))
 
     secondary_comparison =
       left
       |> secondary_metric_value(activity)
-      |> compare_metric_values(secondary_metric_value(right, activity))
+      |> compare_metric_values(
+        secondary_metric_value(right, activity),
+        secondary_metric_direction(activity)
+      )
 
     date_comparison = compare_dates(left.performed_on, right.performed_on)
 
@@ -320,12 +324,48 @@ defmodule Shinobi.Training do
   defp decimal_metric_value(%Decimal{} = value), do: value
   defp decimal_metric_value(value) when is_integer(value), do: Decimal.new(value)
 
-  defp compare_metric_values(nil, nil), do: :eq
-  defp compare_metric_values(nil, _right), do: :lt
-  defp compare_metric_values(_left, nil), do: :gt
+  defp activity_summary_metric_direction(%Activity{} = left, %Activity{} = right) do
+    if primary_metric_direction(left) == :asc and primary_metric_direction(right) == :asc do
+      :asc
+    else
+      :desc
+    end
+  end
 
-  defp compare_metric_values(%Decimal{} = left, %Decimal{} = right),
+  defp primary_metric_direction(%Activity{measurement_type: measurement_type}) do
+    if Activity.time_based?(measurement_type) and not Activity.weighted?(measurement_type) do
+      :asc
+    else
+      :desc
+    end
+  end
+
+  defp secondary_metric_direction(%Activity{measurement_type: measurement_type}) do
+    if Activity.weighted?(measurement_type) and Activity.time_based?(measurement_type) do
+      :asc
+    else
+      :desc
+    end
+  end
+
+  defp compare_metric_values(left, right, direction)
+
+  defp compare_metric_values(nil, nil, _direction), do: :eq
+  defp compare_metric_values(nil, _right, _direction), do: :lt
+  defp compare_metric_values(_left, nil, _direction), do: :gt
+
+  defp compare_metric_values(%Decimal{} = left, %Decimal{} = right, :asc) do
+    left
+    |> Decimal.compare(right)
+    |> reverse_comparison()
+  end
+
+  defp compare_metric_values(%Decimal{} = left, %Decimal{} = right, :desc),
     do: Decimal.compare(left, right)
+
+  defp reverse_comparison(:gt), do: :lt
+  defp reverse_comparison(:lt), do: :gt
+  defp reverse_comparison(:eq), do: :eq
 
   defp compare_dates(nil, nil), do: :eq
   defp compare_dates(nil, _right), do: :lt

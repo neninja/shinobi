@@ -57,6 +57,9 @@ defmodule ShinobiWeb.ActivityLive.IndexTest do
 
     assert has_element?(show_view, "#activity-best-record-value", "95 kg")
     assert has_element?(show_view, "#activity-current-record-#{heavy_record.id}")
+    assert has_element?(show_view, "#activity-history-panel")
+    assert has_element?(show_view, "#activity-history-chart .plotto-chart")
+    assert has_element?(show_view, "#activity-history-chart .plotto-point")
 
     record_link_ids =
       show_view

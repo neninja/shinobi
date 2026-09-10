@@ -104,4 +104,27 @@
 /* Make LiveView wrapper divs transparent for layout */
 [data-phx-session], [data-phx-teleported-src] { display: contents }
 
+.activity-history-chart .plotto-chart {
+  display: block;
+  height: auto;
+  min-width: 520px;
+  width: 100%;
+}
+
+.activity-history-chart .plotto-point {
+  cursor: default;
+  transition: filter 150ms ease, opacity 150ms ease;
+}
+
+.activity-history-chart .plotto-point:hover {
+  filter: drop-shadow(0 3px 5px rgb(5 150 105 / 0.35));
+  opacity: 0.9;
+}
+
+[data-theme="dark"] .activity-history-chart .plotto-label,
+[data-theme="dark"] .activity-history-chart .plotto-title,
+[data-theme="dark"] .activity-history-chart .plotto-legend {
+  fill: #e4e4e7;
+}
+
 /* This file is for your main application CSS */

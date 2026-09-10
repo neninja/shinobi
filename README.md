@@ -1,37 +1,10 @@
 # Shinobi
 
-## Configuração
+## Como instalar
 
-- Inicie o PostgreSQL local
+### 1) Crie o script de update
 
 ```sh
-docker run -d \
-    --name postgres_shinobi \
-    -e POSTGRES_USER=postgres \
-    -e POSTGRES_PASSWORD=postgres \
-    -e POSTGRES_DB=shinobi_dev \
-    -p 5432:5432 \
-    -v shinobi_postgres_data:/var/lib/postgresql/data \
-    postgres:16-alpine
-```
-
-- Baixe as dependências, build, migrations e seed
-
-```shell
-mix setup
-```
-
-> Sugestão de dados iniciais com `mix example.setup` e resetar com `mix fresh`
-
-## Execução
-
-- Inicie o servidor
-
-```shell
-mix server
-```
-
-```
 set -eu
 
 repo="neninja/shinobi"
@@ -127,6 +100,10 @@ fi
 echo "Release atualizada em ${app_dir}"
 ```
 
+### 2) Crie o .env
+
+Configure um banco, no exemplo abaixo é com o container de [CONTRIBUTING](./CONTRIBUTING.md)
+
 ```
 shinobi_home="${SHINOBI_HOME:-${HOME}/shinobi}"
 
@@ -145,7 +122,7 @@ SECRET_KEY_BASE=troque_este_valor_por_um_segredo_fixo_de_64_caracteres_ou_mais
 EOF
 ```
 
-> `DATABASE_URL` precisa ser uma URL completa. Se o app e o Postgres estiverem no mesmo network Docker, use o nome do container como host dentro da URL, por exemplo `ecto://postgres:postgres@postgres_shinobi:5432/shinobi_dev`.
+### 3) Execute as migrations
 
 ```sh
 set -a
@@ -154,6 +131,8 @@ set +a
 
 "${HOME}/shinobi/app/bin/migrate"
 ```
+
+### 4) Inicie a aplicação
 
 ```sh
 set -a
@@ -164,6 +143,8 @@ set +a
 ```
 
 ---
+
+## Como transformo um usuário em admin?
 
 ```sh
 iex -S mix

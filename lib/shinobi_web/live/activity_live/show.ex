@@ -4,6 +4,7 @@ defmodule ShinobiWeb.ActivityLive.Show do
   alias Shinobi.Training
   alias Shinobi.Training.Activity
   alias Shinobi.Training.PersonalRecord
+  alias ShinobiWeb.ActivityHistoryChart
 
   @impl true
   def render(assigns) do
@@ -112,6 +113,41 @@ defmodule ShinobiWeb.ActivityLive.Show do
           </div>
         </div>
 
+        <section
+          id="activity-history-panel"
+          class="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-950"
+        >
+          <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
+                Historico
+              </p>
+              <h2 class="mt-1 text-xl font-semibold text-zinc-950 dark:text-zinc-50">
+                Evolucao da marca
+              </h2>
+            </div>
+            <p class="text-sm text-zinc-600 dark:text-zinc-300">
+              {PersonalRecord.primary_metric_label(@activity)} por data.
+            </p>
+          </div>
+
+          <div
+            id="activity-history-chart"
+            class="activity-history-chart mt-4 overflow-x-auto rounded-md border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-900/60"
+          >
+            <%= if @history_chart_svg do %>
+              {Phoenix.HTML.raw(@history_chart_svg)}
+            <% else %>
+              <div
+                id="activity-history-chart-empty"
+                class="flex min-h-48 items-center justify-center rounded-md border border-dashed border-zinc-300 bg-white px-4 text-center text-sm text-zinc-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-400"
+              >
+                Registre PRs nesta atividade para visualizar a evolucao.
+              </div>
+            <% end %>
+          </div>
+        </section>
+
         <div class="flex items-center justify-between">
           <div>
             <p class="text-xs font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
@@ -205,6 +241,7 @@ defmodule ShinobiWeb.ActivityLive.Show do
       |> assign(:record_count_label, record_count_label(length(records)))
       |> assign(:best_record, best_record)
       |> assign(:best_record_id, best_record && best_record.id)
+      |> assign(:history_chart_svg, ActivityHistoryChart.line_svg(activity, records))
       |> stream(:activity_records, records)
 
     {:ok, socket}
