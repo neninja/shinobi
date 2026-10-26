@@ -37,4 +37,10 @@ npm-debug.log
 
 
 dist
-priv/static
+/priv/static/*
+!/priv/static/manifest.webmanifest
+!/priv/static/images/
+/priv/static/images/*
+!/priv/static/images/icon-180.png
+!/priv/static/images/icon-192.png
+!/priv/static/images/icon-512.png
