@@ -18,8 +18,13 @@ import Ecto.Query
 global_activities = [
   %{
     name: "Cindy",
+    measurement_type: "reps",
+    description: "AMRAP classico medido por voltas."
+  },
+  %{
+    name: "Cindy com peso",
     measurement_type: "rounds_weight",
-    description: "AMRAP classico medido por voltas. Use peso quando houver carga extra."
+    description: "AMRAP classico medido por voltas e peso extra."
   },
   %{
     name: "Karen",
