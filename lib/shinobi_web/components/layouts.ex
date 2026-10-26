@@ -68,13 +68,6 @@ defmodule ShinobiWeb.Layouts do
             Atividades
           </.link>
           <.link
-            id="nav-new-record"
-            navigate={~p"/registros/new"}
-            class="rounded-md px-3 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white"
-          >
-            Novo PR
-          </.link>
-          <.link
             id="nav-settings"
             navigate={~p"/users/settings"}
             class="rounded-md px-3 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white"
@@ -133,10 +126,14 @@ defmodule ShinobiWeb.Layouts do
 
     <nav
       :if={@current_scope && @current_scope.user}
+      id="mobile-navigation"
       class="fixed inset-x-0 bottom-0 z-40 border-t border-zinc-200 bg-white/95 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/95 sm:hidden"
       aria-label="Principal mobile"
     >
-      <div class="mx-auto grid max-w-md grid-cols-2 gap-2">
+      <div class={[
+        "mx-auto grid max-w-md gap-1",
+        if(@current_scope.user.admin, do: "grid-cols-5", else: "grid-cols-4")
+      ]}>
         <.link
           id="mobile-nav-activities"
           navigate={~p"/atividades"}
@@ -145,19 +142,27 @@ defmodule ShinobiWeb.Layouts do
           <.icon name="hero-list-bullet" class="size-5" /> Atividades
         </.link>
         <.link
-          id="mobile-nav-new-record"
-          navigate={~p"/registros/new"}
-          class="flex h-12 flex-col items-center justify-center gap-1 rounded-lg bg-zinc-950 text-xs font-semibold text-white shadow-sm transition hover:bg-zinc-800 dark:bg-emerald-400 dark:text-zinc-950 dark:hover:bg-emerald-300"
+          id="mobile-nav-settings"
+          navigate={~p"/users/settings"}
+          class="flex h-12 flex-col items-center justify-center gap-1 rounded-lg text-xs font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white"
         >
-          <.icon name="hero-plus" class="size-5" /> Novo
+          <.icon name="hero-user-circle" class="size-5" /> Conta
         </.link>
         <.link
           :if={@current_scope.user.admin}
           id="mobile-nav-admin"
           navigate={~p"/admin/users"}
-          class="col-span-2 flex h-12 flex-col items-center justify-center gap-1 rounded-lg text-xs font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white"
+          class="flex h-12 flex-col items-center justify-center gap-1 rounded-lg text-xs font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white"
         >
           <.icon name="hero-shield-check" class="size-5" /> Admin
+        </.link>
+        <.link
+          id="mobile-nav-logout"
+          href={~p"/users/log-out"}
+          method="delete"
+          class="flex h-12 flex-col items-center justify-center gap-1 rounded-lg text-xs font-medium text-red-600 transition hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-950/40"
+        >
+          <.icon name="hero-arrow-right-on-rectangle" class="size-5" /> Sair
         </.link>
       </div>
     </nav>

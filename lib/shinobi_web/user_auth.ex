@@ -290,6 +290,17 @@ defmodule ShinobiWeb.UserAuth do
 
   def signed_in_path(_), do: ~p"/"
 
+  @doc "Redirects authenticated users from public landing routes to their activities."
+  def redirect_if_user_is_authenticated(conn, _opts) do
+    if conn.assigns.current_scope && conn.assigns.current_scope.user do
+      conn
+      |> redirect(to: ~p"/atividades")
+      |> halt()
+    else
+      conn
+    end
+  end
+
   @doc """
   Plug for routes that require the user to be authenticated.
   """

@@ -21,6 +21,8 @@ defmodule ShinobiWeb.UserSessionControllerTest do
 
       # Now do a logged in request and assert on the menu
       conn = get(conn, ~p"/")
+      assert redirected_to(conn) == ~p"/atividades"
+      conn = get(conn, ~p"/atividades")
       response = html_response(conn, 200)
       assert response =~ user.email
       assert response =~ ~p"/users/settings"

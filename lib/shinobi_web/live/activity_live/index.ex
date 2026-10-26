@@ -10,27 +10,24 @@ defmodule ShinobiWeb.ActivityLive.Index do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope}>
       <section id="activities-page" class="space-y-5">
-        <div class="flex items-start justify-between gap-3">
-          <div class="min-w-0">
-            <p class="text-xs font-semibold uppercase tracking-widest text-emerald-700 dark:text-emerald-300">
-              Biblioteca
-            </p>
-            <h1 class="mt-1 text-3xl font-semibold text-zinc-950 dark:text-zinc-50">
-              Atividades
-            </h1>
-            <p class="mt-2 max-w-2xl text-sm leading-6 text-zinc-600 dark:text-zinc-300">
-              Escolha uma atividade para ver os registros dela, ordenados pela melhor marca.
-            </p>
-          </div>
-
-          <.link
-            id="new-activity-button"
-            navigate={~p"/atividades/new"}
-            class="inline-flex h-11 shrink-0 items-center gap-2 rounded-lg bg-zinc-950 px-4 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-zinc-800 active:translate-y-0 dark:bg-emerald-400 dark:text-zinc-950 dark:hover:bg-emerald-300"
-          >
-            <.icon name="hero-plus" class="size-5" /> Nova
-          </.link>
+        <div class="min-w-0">
+          <p class="text-xs font-semibold uppercase tracking-widest text-emerald-700 dark:text-emerald-300">
+            Biblioteca
+          </p>
+          <h1 class="mt-1 text-3xl font-semibold text-zinc-950 dark:text-zinc-50">
+            Atividades
+          </h1>
+          <p class="mt-2 max-w-2xl text-sm leading-6 text-zinc-600 dark:text-zinc-300">
+            Escolha uma atividade para ver os registros dela, ordenados pela melhor marca.
+          </p>
         </div>
+        <.link
+          id="new-activity-button"
+          navigate={~p"/atividades/new"}
+          class="inline-flex h-11 shrink-0 items-center gap-2 rounded-lg bg-zinc-950 px-4 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-zinc-800 active:translate-y-0 dark:bg-emerald-400 dark:text-zinc-950 dark:hover:bg-emerald-300"
+        >
+          <.icon name="hero-plus" class="size-5" /> Nova tipo de atividade
+        </.link>
 
         <.form
           for={@filter_form}
@@ -141,7 +138,7 @@ defmodule ShinobiWeb.ActivityLive.Index do
                   class="inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-md bg-emerald-600 px-3 text-sm font-semibold text-white transition hover:bg-emerald-500"
                   aria-label="Registrar PR"
                 >
-                  <.icon name="hero-trophy" class="size-4" />
+                  <.icon name="hero-trophy" class="size-4" /> Novo Recorde
                 </.link>
 
                 <.link

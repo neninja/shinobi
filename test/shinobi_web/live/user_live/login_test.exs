@@ -62,29 +62,29 @@ defmodule ShinobiWeb.UserLive.LoginTest do
     end
   end
 
-#  describe "re-authentication (sudo mode)" do
-#    setup %{conn: conn} do
-#      user = user_fixture()
-#      %{user: user, conn: log_in_user(conn, user)}
-#    end
-#
-#    test "shows login page with email filled in", %{conn: conn, user: user} do
-#      {:ok, lv, html} = live(conn, ~p"/users/log-in")
-#
-#      assert html =~ "You need to reauthenticate"
-#      refute html =~ "Register"
-#      assert html =~ "Password"
-#      refute html =~ "Log in with email"
-#
-#      email_value =
-#        lv
-#        |> render()
-#        |> LazyHTML.from_fragment()
-#        |> LazyHTML.query("#login_form_password_email")
-#        |> LazyHTML.attribute("value")
-#        |> List.first()
-#
-#      assert email_value == user.email
-#    end
-#  end
+  #  describe "re-authentication (sudo mode)" do
+  #    setup %{conn: conn} do
+  #      user = user_fixture()
+  #      %{user: user, conn: log_in_user(conn, user)}
+  #    end
+  #
+  #    test "shows login page with email filled in", %{conn: conn, user: user} do
+  #      {:ok, lv, html} = live(conn, ~p"/users/log-in")
+  #
+  #      assert html =~ "You need to reauthenticate"
+  #      refute html =~ "Register"
+  #      assert html =~ "Password"
+  #      refute html =~ "Log in with email"
+  #
+  #      email_value =
+  #        lv
+  #        |> render()
+  #        |> LazyHTML.from_fragment()
+  #        |> LazyHTML.query("#login_form_password_email")
+  #        |> LazyHTML.attribute("value")
+  #        |> List.first()
+  #
+  #      assert email_value == user.email
+  #    end
+  #  end
 end

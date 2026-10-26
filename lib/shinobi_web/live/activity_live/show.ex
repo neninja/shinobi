@@ -49,7 +49,7 @@ defmodule ShinobiWeb.ActivityLive.Show do
                 navigate={~p"/registros/new?#{[activity_id: @activity.id]}"}
                 class="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 text-sm font-semibold text-white transition hover:bg-emerald-500 sm:flex-none"
               >
-                <.icon name="hero-trophy" class="size-5" /> PR
+                <.icon name="hero-trophy" class="size-5" /> Novo Recorde
               </.link>
 
               <.link
