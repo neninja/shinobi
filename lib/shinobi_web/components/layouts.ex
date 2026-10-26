@@ -132,7 +132,7 @@ defmodule ShinobiWeb.Layouts do
     >
       <div class={[
         "mx-auto grid max-w-md gap-1",
-        if(@current_scope.user.admin, do: "grid-cols-5", else: "grid-cols-4")
+        if(@current_scope.user.admin, do: "grid-cols-4", else: "grid-cols-3")
       ]}>
         <.link
           id="mobile-nav-activities"
