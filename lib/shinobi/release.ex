@@ -18,6 +18,17 @@ defmodule Shinobi.Release do
     {:ok, _, _} = Ecto.Migrator.with_repo(repo, &Ecto.Migrator.run(&1, :down, to: version))
   end
 
+  def seed do
+    load_app()
+
+    {:ok, _, _} =
+      Ecto.Migrator.with_repo(Shinobi.Repo, fn _repo ->
+        @app
+        |> Application.app_dir("priv/repo/seeds.exs")
+        |> Code.eval_file()
+      end)
+  end
+
   defp repos do
     Application.fetch_env!(@app, :ecto_repos)
   end

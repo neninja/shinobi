@@ -133,6 +133,15 @@ set +a
 "${HOME}/shinobi/app/bin/migrate"
 ```
 
+Após as migrations, execute o seed para criar ou atualizar as atividades globais:
+
+```sh
+"${HOME}/shinobi/app/bin/seed"
+```
+
+O comando usa as mesmas variáveis de ambiente carregadas acima e pode ser executado
+novamente para atualizar as atividades existentes.
+
 ### 4) Inicie a aplicação
 
 ```sh
